@@ -23,16 +23,19 @@ AudioConnection patchCord3(sine2, 0, mixer0, 2);
 AudioConnection patchCord4(mixer0, 0, i2s1, 0);
 AudioConnection patchCord5(mixer0, 0, i2s1, 1);
 AudioControlSGTL5000 sgtl5000_1;
-
+constexpr float sine0_freq = 165;
+constexpr float sine1_freq = 500;
+constexpr float sine2_freq = 1450;
+constexpr float slope = 1250; // how much to change per meter
 void setup()
 {
-    AudioMemory(30);
+    AudioMemory(50);
     sgtl5000_1.enable();
     sgtl5000_1.volume(0.3);
 
-    sine0.frequency(165.0);
-    sine1.frequency(500.0);
-    sine2.frequency(1450.0);
+    sine0.frequency(sine0_freq);
+    sine1.frequency(sine1_freq);
+    sine2.frequency(sine2_freq);
     // normalize to prevent clipping (though we don't control for perceived loudness yet, unlike the original)
     sine0.amplitude(1.0 / 3.0);
     sine1.amplitude(1.0 / 3.0);
@@ -56,8 +59,8 @@ void loop()
         std::memcpy(&mouse_x, begin, sizeof(mouse_x));
         std::memcpy(&mouse_y, begin + sizeof(mouse_x), sizeof(mouse_y));
         AudioNoInterrupts();
-        sine1.frequency(-mouse_x * 1250.0 + 650.0);
-        sine2.frequency(mouse_y * 1250.0 + 1350.0);
+        sine1.frequency(-mouse_x * slope + sine1_freq);
+        sine2.frequency(mouse_y * slope + sine2_freq);
         AudioInterrupts();
     }
 }
